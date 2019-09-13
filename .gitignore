@@ -1,4 +1,5 @@
 config.py
+*.obj # pickle-saved objects
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

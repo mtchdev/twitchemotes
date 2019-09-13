@@ -4,6 +4,7 @@ import urllib.request as request
 import sys
 import twitch
 import time
+import pickle
 from config import OAUTH
 
 class Emote(object):
@@ -31,6 +32,11 @@ class TwitchStats(object):
             for x in range(msg.count(emote.name)):
                 print(f"Found {emote.name}!")
                 self.usage.append({"emote": emote, "time": int(time.time())})
+                self.file_out()
+
+    def file_out(self):
+        with open("usage.obj", "wb") as f:
+            pickle.dump(self.usage, f)
 
 def get_emotes(apis, channel):
     b_raw = json.loads(request.urlopen(apis["bttv_url"] + channel).read())
