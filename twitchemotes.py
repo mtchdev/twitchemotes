@@ -3,6 +3,11 @@ import json
 import urllib.request as request
 import sys
 
+class Emote(object):
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
+
 def get_emotes(ffz_url, bttv_url, channel):
     b_raw = json.loads(request.urlopen(bttv_url + channel).read())
     f_raw = json.loads(request.urlopen(ffz_url + channel).read())
@@ -15,11 +20,14 @@ def get_emotes(ffz_url, bttv_url, channel):
     emotes = []
 
     for emote in bttv:
-        x = emote["code"]
+        bttv_uri_template = "https:" + b_raw["urlTemplate"]
+        url = bttv_uri_template.replace("{{id}}", emote["id"]).replace("{{image}}", "1x")
+        x = Emote(emote["code"], url)
         emotes.append(x)
 
     for emote in ffz:
-        x = emote["name"]
+        url = "https:" + emote["urls"]["1"]
+        x = Emote(emote["name"], url)
         emotes.append(x)
 
     print(f"Loaded {len(emotes)} custom emoticons.")
