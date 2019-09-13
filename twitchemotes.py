@@ -2,11 +2,32 @@ import yaml
 import json
 import urllib.request as request
 import sys
+import twitch
+from config import OAUTH
 
 class Emote(object):
     def __init__(self, name, url):
         self.name = name
         self.url = url
+
+class TwitchStats(object):
+    def __init__(self, ffz_url, bttv_url, channel):
+        # get emotes first
+        self.emotes = get_emotes(ffz_url, bttv_url, channel)
+        self.ffz = ffz_url
+        self.bttv = bttv_url
+        self.channel = "#" + channel
+        self.monitor()
+
+    def monitor(self):
+        print(f"Watching for messages in {self.channel}...")
+        twitch.Chat(channel=self.channel, nickname="spliitzx", oauth=OAUTH).subscribe(lambda message: self.handle_message(message))
+
+    def handle_message(self, message):
+        msg = message.text
+        for emote in self.emotes:
+            if emote.name in msg:
+                print(f"Found {emote.name}!")
 
 def get_emotes(ffz_url, bttv_url, channel):
     b_raw = json.loads(request.urlopen(bttv_url + channel).read())
@@ -31,6 +52,7 @@ def get_emotes(ffz_url, bttv_url, channel):
         emotes.append(x)
 
     print(f"Loaded {len(emotes)} custom emoticons.")
+    return emotes
 
 if __name__ == "__main__":
     print("Welcome to TwitchEmotes!")
@@ -41,4 +63,5 @@ if __name__ == "__main__":
         bttv = data["bttv_url"]
 
     user = input("Twitch Channel: #")
-    get_emotes(ffz, bttv, user)
+    TwitchStats(ffz, bttv, user)
+
