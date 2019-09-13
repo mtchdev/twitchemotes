@@ -15,9 +15,9 @@ class TwitchStats(object):
 
     usage = [] # main usage array with types Usage
 
-    def __init__(self, urlset, channel):
+    def __init__(self, apis, channel):
         # get emotes first
-        self.emotes = get_emotes(urlset[0], urlset[1], urlset[2], channel)
+        self.emotes = get_emotes(apis, channel)
         self.channel = "#" + channel
         self.monitor()
 
@@ -32,19 +32,17 @@ class TwitchStats(object):
                 print(f"Found {emote.name}!")
                 self.usage.append({"emote": emote, "time": int(time.time())})
 
-def get_emotes(ffz_url, bttv_url, all_url, channel):
-    b_raw = json.loads(request.urlopen(bttv_url + channel).read())
-    f_raw = json.loads(request.urlopen(ffz_url + channel).read())
-    all_raw = json.loads(request.urlopen(all_url).read())
-    bttv = b_raw["emotes"]
+def get_emotes(apis, channel):
+    b_raw = json.loads(request.urlopen(apis["bttv_url"] + channel).read())
+    f_raw = json.loads(request.urlopen(apis["ffz_url"] + channel).read())
+    all_raw = json.loads(request.urlopen(apis["all_url"]).read())
+    bg_raw = json.loads(request.urlopen(apis["bttv_global_url"]).read())
+    fg_raw = json.loads(request.urlopen(apis["ffz_global_url"]).read())
     ffz = next(iter(f_raw["sets"].values()))["emoticons"]
-    if not bttv or not ffz:
-        print("No emoticon sets found.")
-        sys.exit()
 
-    emotes = []
+    emotes = [] # the emotes array
 
-    for emote in bttv:
+    for emote in b_raw["emotes"]:
         bttv_uri_template = "https:" + b_raw["urlTemplate"]
         url = bttv_uri_template.replace("{{id}}", emote["id"]).replace("{{image}}", "1x")
         x = Emote(emote["code"], url)
@@ -59,24 +57,26 @@ def get_emotes(ffz_url, bttv_url, all_url, channel):
         x = Emote(emote, None)
         emotes.append(x)
 
-    print(f"Loaded {len(ffz) + len(bttv)} custom emoticons and found {len(all_raw)} default emotes.")
+    for emote in bg_raw["emotes"]:
+        bttv_uri_template = "https:" + bg_raw["urlTemplate"]
+        url = bttv_uri_template.replace("{{id}}", emote["id"]).replace("{{image}}", "1x")
+        x = Emote(emote["code"], url)
+        emotes.append(x)
+
+    for emote in fg_raw["emoticons"]:
+        url = "https:" + emote["urls"]["1"]
+        x = Emote(emote["name"], url)
+        emotes.append(x)
+
+    print(f"Loaded {len(ffz) + len(b_raw['emotes'])} custom emoticons and found {len(all_raw) + len(bg_raw['emotes']) + len(fg_raw['emoticons'])} default emotes.")
     return emotes
 
 if __name__ == "__main__":
     print("Welcome to TwitchEmotes!")
 
     with open("api.yaml") as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)
-        ffz = data["ffz_url"]
-        bttv = data["bttv_url"]
-        all_ = data["all_url"]
+        apis = yaml.load(f, Loader=yaml.FullLoader)
 
     user = input("Twitch Channel: #")
-
-    urlset = [
-            ffz,
-            bttv,
-            all_
-        ]
-    TwitchStats(urlset, user)
+    TwitchStats(apis, user)
 
