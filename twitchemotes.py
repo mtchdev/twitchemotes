@@ -3,6 +3,7 @@ import json
 import urllib.request as request
 import sys
 import twitch
+import time
 from config import OAUTH
 
 class Emote(object):
@@ -11,11 +12,12 @@ class Emote(object):
         self.url = url
 
 class TwitchStats(object):
-    def __init__(self, ffz_url, bttv_url, channel):
+
+    usage = [] # main usage array with types Usage
+
+    def __init__(self, urlset, channel):
         # get emotes first
-        self.emotes = get_emotes(ffz_url, bttv_url, channel)
-        self.ffz = ffz_url
-        self.bttv = bttv_url
+        self.emotes = get_emotes(urlset[0], urlset[1], urlset[2], channel)
         self.channel = "#" + channel
         self.monitor()
 
@@ -26,12 +28,14 @@ class TwitchStats(object):
     def handle_message(self, message):
         msg = message.text
         for emote in self.emotes:
-            if emote.name in msg:
+            for x in range(msg.count(emote.name)):
                 print(f"Found {emote.name}!")
+                self.usage.append({"emote": emote, "time": int(time.time())})
 
-def get_emotes(ffz_url, bttv_url, channel):
+def get_emotes(ffz_url, bttv_url, all_url, channel):
     b_raw = json.loads(request.urlopen(bttv_url + channel).read())
     f_raw = json.loads(request.urlopen(ffz_url + channel).read())
+    all_raw = json.loads(request.urlopen(all_url).read())
     bttv = b_raw["emotes"]
     ffz = next(iter(f_raw["sets"].values()))["emoticons"]
     if not bttv or not ffz:
@@ -51,7 +55,11 @@ def get_emotes(ffz_url, bttv_url, channel):
         x = Emote(emote["name"], url)
         emotes.append(x)
 
-    print(f"Loaded {len(emotes)} custom emoticons.")
+    for emote in all_raw:
+        x = Emote(emote, None)
+        emotes.append(x)
+
+    print(f"Loaded {len(ffz) + len(bttv)} custom emoticons and found {len(all_raw)} default emotes.")
     return emotes
 
 if __name__ == "__main__":
@@ -61,7 +69,14 @@ if __name__ == "__main__":
         data = yaml.load(f, Loader=yaml.FullLoader)
         ffz = data["ffz_url"]
         bttv = data["bttv_url"]
+        all_ = data["all_url"]
 
     user = input("Twitch Channel: #")
-    TwitchStats(ffz, bttv, user)
+
+    urlset = [
+            ffz,
+            bttv,
+            all_
+        ]
+    TwitchStats(urlset, user)
 
