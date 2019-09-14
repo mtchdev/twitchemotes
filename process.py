@@ -42,10 +42,10 @@ def graph_data():
             obj = pickle.load(f)
             sort = OrderedDict(sorted(obj.items(), key=itemgetter(1), reverse=True))
 
-            x = range(len(sort))
-            y = list(sort.values())
-            plt.barh(x, y, align="center")
-            plt.yticks(x, list(obj))
+            y = range(len(sort))
+            x = list(sort.values())
+            plt.barh(y, x, align="center")
+            plt.yticks(y, list(obj))
             plt.draw()
             plt.pause(0.001)
 
