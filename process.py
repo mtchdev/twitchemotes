@@ -46,7 +46,7 @@ def graph_data():
 
             y = range(len(sort))
             x = list(sort.values())
-            plt.barh(y, x, align="center", color="red")
+            plt.barh(y, x, align="center", color=["red", "gold", "green", "turquoise", "dodgerblue", "darkviolet", "slategrey"])
             plt.yticks(y, list(obj))
             plt.draw()
             plt.pause(0.001)
