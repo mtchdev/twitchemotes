@@ -12,6 +12,22 @@ class Emote(object):
         self.name = name
         self.url = url
 
+class Graph(object):
+    usage = {}
+
+    def __init__(self):
+        print("created graph")
+
+    def add_usage(self, emote):
+        try:
+            i = self.usage[emote.name]
+            self.usage[emote.name] = i+1
+        except KeyError:
+            self.usage[emote.name] = 1
+            pass
+
+        print(self.usage)
+
 class TwitchStats(object):
 
     usage = [] # main usage array with types Usage
@@ -20,6 +36,7 @@ class TwitchStats(object):
         # get emotes first
         self.emotes = get_emotes(apis, channel)
         self.channel = "#" + channel
+        self.graph = Graph()
         self.monitor()
 
     def monitor(self):
@@ -33,6 +50,7 @@ class TwitchStats(object):
                 print(f"Found {emote.name}!")
                 self.usage.append({"emote": emote, "time": int(time.time())})
                 self.file_out()
+                self.graph.add_usage(emote)
 
     def file_out(self):
         with open("usage.obj", "wb") as f:

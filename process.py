@@ -2,6 +2,7 @@ import pickle
 from twitchemotes import Emote
 import time
 import sys
+from collections import Counter
 
 SECONDS_SPLIT = 5
 
@@ -22,7 +23,11 @@ def process_data():
                     iteration += 1
                     batch.append([])
 
-            print(batch)
+            for x in range(len(batch)):
+                c = Counter(batch[x]).most_common(5)
+                print(f"MOST USED BETWEEN {x*SECONDS_SPLIT} AND {(x+1)*SECONDS_SPLIT} SECONDS:")
+                print(c)
+
     except IOError:
         print("Couldn't find usage.obj, have you run twitchemotes.py yet?")
         sys.exit()
