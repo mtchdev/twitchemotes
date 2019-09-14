@@ -1,6 +1,8 @@
 import pickle
 from twitchemotes import Emote
 import time
+from collections import OrderedDict
+from operator import itemgetter
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,9 +40,10 @@ def graph_data():
     try:
         with open("graph.obj", "rb") as f:
             obj = pickle.load(f)
+            sort = OrderedDict(sorted(obj.items(), key=itemgetter(1), reverse=True))
 
-            x = range(len(obj))
-            y = list(obj.values())
+            x = range(len(sort))
+            y = list(sort.values())
             plt.barh(x, y, align="center")
             plt.yticks(x, list(obj))
             plt.draw()

@@ -1,5 +1,6 @@
 config.py
 usage.obj
+graph.obj
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
