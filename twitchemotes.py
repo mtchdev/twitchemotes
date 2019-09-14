@@ -26,7 +26,11 @@ class Graph(object):
             self.usage[emote.name] = 1
             pass
 
-        print(self.usage)
+        self.save_usage()
+
+    def save_usage(self):
+        with open("graph.obj", "wb") as f:
+            pickle.dump(self.usage, f)
 
 class TwitchStats(object):
 

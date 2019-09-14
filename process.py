@@ -2,6 +2,8 @@ import pickle
 from twitchemotes import Emote
 import time
 import sys
+import matplotlib.pyplot as plt
+import numpy as np
 from collections import Counter
 
 SECONDS_SPLIT = 5
@@ -32,6 +34,27 @@ def process_data():
         print("Couldn't find usage.obj, have you run twitchemotes.py yet?")
         sys.exit()
 
+def graph_data():
+    try:
+        with open("graph.obj", "rb") as f:
+            obj = pickle.load(f)
+
+            x = range(len(obj))
+            y = list(obj.values())
+            plt.barh(x, y, align="center")
+            plt.yticks(x, list(obj))
+            plt.draw()
+            plt.pause(0.001)
+
+    except IOError:
+        print("Could'nt find graph.obj, have you run twitchemotes.py yet?")
+    except EOFError:
+        pass # silent pass
+
 if __name__ == "__main__":
-    process_data()
+    graph_data()
+    plt.show()
+    while True:
+        graph_data()
+        time.sleep(1)
 
