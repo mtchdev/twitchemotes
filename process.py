@@ -40,7 +40,9 @@ def graph_data():
     try:
         with open("graph.obj", "rb") as f:
             obj = pickle.load(f)
-            sort = OrderedDict(sorted(obj.items(), key=itemgetter(1), reverse=True))
+            _sort = OrderedDict(sorted(obj.items(), key=itemgetter(1), reverse=True))
+            
+            sort = dict(list(_sort.items())[:20])
 
             y = range(len(sort))
             x = list(sort.values())
