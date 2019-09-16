@@ -41,8 +41,10 @@ def graph_data():
         with open("graph.obj", "rb") as f:
             obj = pickle.load(f)
             _sort = OrderedDict(sorted(obj.items(), key=itemgetter(1), reverse=True))
-            
-            sort = dict(list(_sort.items())[:20])
+            if "--no-limit" in sys.argv:
+                sort = dict(list(_sort.items()))
+            else:
+                sort = dict(list(_sort.items())[:20])
 
             y = range(len(sort))
             x = list(sort.values())
@@ -53,11 +55,13 @@ def graph_data():
 
     except IOError:
         print("Could'nt find graph.obj, have you run twitchemotes.py yet?")
+        sys.exit()
     except EOFError:
         pass # silent pass
 
 if __name__ == "__main__":
     graph_data()
+    plt.figure(num="TwitchEmotes")
     plt.show()
     while True:
         graph_data()
